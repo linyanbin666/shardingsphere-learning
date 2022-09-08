@@ -1,0 +1,37 @@
+spring:
+  shardingsphere:
+    datasource:
+      names: dsmaster,dsslave0,dsslave1
+      dsmaster:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/dsmaster
+        username: root
+        password: root
+      dsslave0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/dsslave0
+        username: root
+        password: root
+      dsslave1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/dsslave1
+        username: root
+        password: root
+    rules:
+      readwrite-splitting:
+        data-sources:
+          health_ms:
+            type: Static
+            props:
+              write-data-source-name: dsmaster
+              read-data-source-names: dsslave0,dsslave1
+              load-balancer-name: random_load_balancer
+        load-balancers:
+          random_load_balancer:
+            type: ROUND_ROBIN
+logging:
+  level:
+    org.apache.shardingsphere: debug

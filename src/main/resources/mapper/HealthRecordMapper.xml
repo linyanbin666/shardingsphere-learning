@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.horin.shardingsphere.learning.health.repository.HealthRecordRepository">
+  <insert id="addEntity" parameterType="com.horin.shardingsphere.learning.health.entity.HealthRecord"
+    useGeneratedKeys="true" keyProperty="recordId">
+    INSERT INTO health_record(user_id, level_id, remark) VALUES (#{userId}, #{levelId}, #{remark})
+  </insert>
+</mapper>

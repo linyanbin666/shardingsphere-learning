@@ -1,0 +1,51 @@
+spring:
+  shardingsphere:
+    datasource:
+      names: ds0,ds1
+      ds0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/ds0
+        username: root
+        password: root
+      ds1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/ds1
+        username: root
+        password: root
+    rules:
+      sharding:
+        default-database-strategy:
+          standard:
+            sharding-column: user_id
+            sharding-algorithm-name: inline
+
+        sharding-algorithms:
+            inline:
+              type: INLINE
+              props:
+                algorithm-expression: ds$->{user_id % 2}
+
+        binding-tables:
+          - health_record
+          - health_task
+
+        broadcast-tables:
+          - health_level
+
+        key-generators:
+          snowflake_key_generator:
+              type: SNOWFLAKE
+
+        tables:
+          health_record:
+            actual-data-nodes: ds$->{0..1}.health_record
+            key-generate-strategy:
+              column: record_id
+              key-generator-name: snowflake_key_generator
+          health_task:
+            actual-data-nodes: ds$->{0..1}.health_task
+            key-generate-strategy:
+              column: task_id
+              key-generator-name: snowflake_key_generator

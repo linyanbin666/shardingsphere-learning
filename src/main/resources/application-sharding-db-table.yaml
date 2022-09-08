@@ -1,0 +1,63 @@
+spring:
+  shardingsphere:
+    datasource:
+      names: ds3,ds4
+      ds3:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/ds3
+        username: root
+        password: root
+      ds4:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/ds4
+        username: root
+        password: root
+    rules:
+      sharding:
+        default-database-strategy:
+          standard:
+            sharding-column: user_id
+            sharding-algorithm-name: db_sharding
+        sharding-algorithms:
+          db_sharding:
+            type: INLINE
+            props:
+              algorithm-expression: ds$->{user_id % 2 + 3}
+          health_record_table_sharding:
+            type: INLINE
+            props:
+              algorithm-expression: health_record$->{record_id % 3}
+          health_task_table_sharding:
+            type: INLINE
+            props:
+              algorithm-expression: health_task$->{record_id % 3}
+
+        binding-tables:
+          - health_record
+          - health_task
+        broadcast-tables:
+          - health_level
+        key-generators:
+          snowflake_key_generator:
+            type: SNOWFLAKE
+        tables:
+          health_record:
+            actual-data-nodes: ds$->{3..4}.health_record$->{0..2}
+            key-generate-strategy:
+              column: record_id
+              key-generator-name: snowflake_key_generator
+            table-strategy:
+              standard:
+                sharding-column: record_id
+                sharding-algorithm-name: health_record_table_sharding
+          health_task:
+            actual-data-nodes: ds$->{3..4}.health_task$->{0..2}
+            key-generate-strategy:
+              column: task_id
+              key-generator-name: snowflake_key_generator
+            table-strategy:
+              standard:
+                sharding-column: record_id
+                sharding-algorithm-name: health_task_table_sharding

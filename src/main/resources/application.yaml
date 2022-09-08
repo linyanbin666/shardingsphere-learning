@@ -1,0 +1,9 @@
+spring:
+  profiles:
+    active: master-slave
+  shardingsphere:
+    props:
+      sql-show: true
+
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
